@@ -16,8 +16,25 @@ const Wishlist = require("../models/wishlistModel");
 const { connectKiteWebSocket, loadOrders, reloadZerodaSockets } = require("../kiteConnect/socket");
 const { pagination } = require("../utils/helper");
 // const dataFilePath = path.join(__dirname, "instruments.json");
-let optionData = JSON.parse(fs.readFileSync('./option.json', "utf8"));
-let instrumentsData = JSON.parse(fs.readFileSync('./instruments.json', "utf8"));
+let optionData = [];
+let instrumentsData = [];
+
+try {
+  if (fs.existsSync('./option.json')) {
+    optionData = JSON.parse(fs.readFileSync('./option.json', "utf8"));
+  }
+} catch (error) {
+  console.log('option.json not found, will be created on first fetch');
+}
+
+try {
+  if (fs.existsSync('./instruments.json')) {
+    instrumentsData = JSON.parse(fs.readFileSync('./instruments.json', "utf8"));
+  }
+} catch (error) {
+  console.log('instruments.json not found, will be created on first fetch');
+}
+
 const {isMarketOpen, initialCheck} = require("../utils/checkMarketStatus");
 
 const apiKey = process.env.ZERODHA_API_KEY;
