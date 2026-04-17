@@ -93,6 +93,18 @@ class Wishlist {
         await batch.commit();
         return { deletedCount: wishlists.length };
     }
+
+    static async findWithSort(query = {}, sortField = 'createdAt', sortOrder = 'desc') {
+        let queryRef = Wishlist.getCollection();
+        
+        for (const [key, value] of Object.entries(query)) {
+            queryRef = queryRef.where(key, '==', value);
+        }
+        
+        queryRef = queryRef.orderBy(sortField, sortOrder);
+        const snapshot = await queryRef.get();
+        return snapshot.docs.map(doc => new Wishlist({ id: doc.id, ...doc.data() }));
+    }
 }
 
 module.exports = Wishlist;

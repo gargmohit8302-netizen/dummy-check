@@ -90,6 +90,18 @@ class WalletTransaction {
         await batch.commit();
         return { deletedCount: transactions.length };
     }
+
+    static async findWithSort(query = {}, sortField = 'createdAt', sortOrder = 'desc') {
+        let queryRef = WalletTransaction.getCollection();
+        
+        for (const [key, value] of Object.entries(query)) {
+            queryRef = queryRef.where(key, '==', value);
+        }
+        
+        queryRef = queryRef.orderBy(sortField, sortOrder);
+        const snapshot = await queryRef.get();
+        return snapshot.docs.map(doc => new WalletTransaction({ id: doc.id, ...doc.data() }));
+    }
 }
 
 module.exports = WalletTransaction;

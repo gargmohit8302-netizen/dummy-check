@@ -171,6 +171,41 @@ class LimitOrder {
         await batch.commit();
         return { modifiedCount: orders.length };
     }
+
+    static async countDocuments(query = {}) {
+        let queryRef = LimitOrder.getCollection();
+        
+        for (const [key, value] of Object.entries(query)) {
+            if (typeof value === 'object') {
+                if (value.$gte) queryRef = queryRef.where(key, '>=', value.$gte);
+                if (value.$lt) queryRef = queryRef.where(key, '<', value.$lt);
+                if (value.$in) queryRef = queryRef.where(key, 'in', value.$in);
+            } else {
+                queryRef = queryRef.where(key, '==', value);
+            }
+        }
+        
+        const snapshot = await queryRef.get();
+        return snapshot.size;
+    }
+
+    static async findWithSort(query = {}, sortField = 'createdAt', sortOrder = 'desc') {
+        let queryRef = LimitOrder.getCollection();
+        
+        for (const [key, value] of Object.entries(query)) {
+            if (typeof value === 'object') {
+                if (value.$gte) queryRef = queryRef.where(key, '>=', value.$gte);
+                if (value.$lt) queryRef = queryRef.where(key, '<', value.$lt);
+                if (value.$in) queryRef = queryRef.where(key, 'in', value.$in);
+            } else {
+                queryRef = queryRef.where(key, '==', value);
+            }
+        }
+        
+        queryRef = queryRef.orderBy(sortField, sortOrder);
+        const snapshot = await queryRef.get();
+        return snapshot.docs.map(doc => new LimitOrder({ id: doc.id, ...doc.data() }));
+    }
 }
 
 module.exports = LimitOrder;

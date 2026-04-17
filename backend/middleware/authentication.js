@@ -10,9 +10,9 @@ const auth = asyncHandler(async(req, res, next) => {
 
     if(token){
         try {
-            const decodeToken = await jwt.verify(token, process.env.TOKEN_SECRET)
+            const decodeToken = jwt.verify(token, process.env.TOKEN_SECRET)
             // console.log(decodeToken, "decodeToken");
-            const user = await User.findById(decodeToken?._id).select("_id name email isBlocked")
+            const user = await User.findById(decodeToken?._id)
             if(!user){
                 throw new ApiError(401, "Invalid Token")
             }
@@ -36,9 +36,9 @@ const adminAuth = asyncHandler(async(req, res, next) => {
 
     if(token){
         try {
-            const decodeToken = await jwt.verify(token, process.env.TOKEN_SECRET)
+            const decodeToken = jwt.verify(token, process.env.TOKEN_SECRET)
             // console.log(decodeToken, "decodeToken");
-            const user = await Admin.findById(decodeToken?._id).select("_id email")
+            const user = await Admin.findById(decodeToken?._id)
             if(!user){
                 throw new ApiError(401, "Invalid Token")
             }

@@ -113,6 +113,81 @@ class User {
         return { deletedCount: 0 };
     }
 
+    static async countDocuments(query = {}) {
+        let queryRef = User.getCollection();
+        
+        for (const [key, value] of Object.entries(query)) {
+            if (key === '$gte' || key === '$lt' || key === '$in') continue;
+            queryRef = queryRef.where(key, '==', value);
+        }
+        
+        const snapshot = await queryRef.get();
+        return snapshot.size;
+    }
+
+    static async findWithSort(query = {}, sortField = 'createdAt', sortOrder = 'desc') {
+        let queryRef = User.getCollection();
+        
+        for (const [key, value] of Object.entries(query)) {
+            if (typeof value === 'object' && value.$in) {
+                queryRef = queryRef.where(key, 'in', value.$in);
+            } else {
+                queryRef = queryRef.where(key, '==', value);
+            }
+        }
+        
+        queryRef = queryRef.orderBy(sortField, sortOrder);
+        const snapshot = await queryRef.get();
+        return snapshot.docs.map(doc => new User({ id: doc.id, ...doc.data() }));
+    }
+
+    static async findWithPagination(query = {}, page = 1, limit = 10, sortField = 'createdAt', sortOrder = 'desc') {
+        let queryRef = User.getCollection();
+        
+        // Handle search with $or
+        if (query.$or) {
+            // Firestore doesn't support $or directly, we'll fetch all and filter in JS
+            const snapshot = await queryRef.get();
+            let users = snapshot.docs.map(doc => new User({ id: doc.id, ...doc.data() }));
+            
+            // Filter by $or conditions
+            users = users.filter(user => {
+                return query.$or.some(condition => {
+                    return Object.entries(condition).every(([key, regex]) => {
+                        if (regex instanceof RegExp) {
+                            return regex.test(user[key]);
+                        }
+                        return user[key] === regex;
+                    });
+                });
+            });
+            
+            // Sort
+            users.sort((a, b) => {
+                if (sortOrder === 'desc') {
+                    return b[sortField] - a[sortField];
+                }
+                return a[sortField] - b[sortField];
+            });
+            
+            // Paginate
+            const start = (page - 1) * limit;
+            return users.slice(start, start + limit);
+        }
+        
+        // Normal query
+        for (const [key, value] of Object.entries(query)) {
+            queryRef = queryRef.where(key, '==', value);
+        }
+        
+        queryRef = queryRef.orderBy(sortField, sortOrder);
+        queryRef = queryRef.limit(limit);
+        queryRef = queryRef.offset((page - 1) * limit);
+        
+        const snapshot = await queryRef.get();
+        return snapshot.docs.map(doc => new User({ id: doc.id, ...doc.data() }));
+    }
+
     async generateToken() {
         return jwt.sign(
             {

@@ -173,11 +173,7 @@ module.exports = {
             Query["$or"] = [{ name: searchData }, { email: searchData }]
         }
 
-        let getAllUsers = await User.find(Query)
-            .sort({ createdAt: -1 })
-            .limit(perPage)
-            .skip(perPage * (page - 1))
-            .select('-token -fcmToken')
+        let getAllUsers = await User.findWithPagination(Query, page, perPage, 'createdAt', 'desc');
   
         let totalData = await User.countDocuments(Query);
   

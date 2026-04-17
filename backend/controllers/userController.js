@@ -361,7 +361,7 @@ module.exports = {
     
     getSingleUser: asyncHandler(async(req, res)=>{
 
-      const findUser = await User.findById(req.user._id).select('email name walletBalance');
+      const findUser = await User.findById(req.user._id);
       
       if(findUser){
 
@@ -572,7 +572,7 @@ module.exports = {
           throw new ApiError(400, "Please add wishlist name")
         }
 
-        const wishlist = await Wishlist.find({ user: userId, wishlist_name }).sort({ createdAt: -1 });
+        const wishlist = await Wishlist.findWithSort({ user: userId, wishlist_name }, 'createdAt', 'desc');
 
         return res.status(200).json(
           new ApiResponse(
@@ -1032,19 +1032,11 @@ module.exports = {
     getPortfolio: asyncHandler(async(req, res)=>{
       const { type } = req.query;
 
-      // const today = new Date();
-      // today.setHours(0, 0, 0, 0);
-
       const startOfDayIST = moment().tz("Asia/Kolkata").startOf("day").toDate();
       const endOfDayIST = moment().tz("Asia/Kolkata").endOf("day").toDate();
 
       if(type === "open"){
-        const orders = await LimitOrder.find({ user: req.user._id, status: "pending" }).sort({ createdAt: -1 });
-
-        // const data = orders.map((v)=>{
-        //   const findData = instrumentsData.find((item) => item.instrument_token === Number(v.instrument_id));
-        //   return v;
-        // })
+        const orders = await LimitOrder.findWithSort({ user: req.user._id, status: "pending" }, 'createdAt', 'desc');
 
         return res.status(200).json(
           new ApiResponse(
@@ -1270,7 +1262,7 @@ module.exports = {
 
         });
 
-        const openTrades = await LimitOrder.find({ user: req.user._id, status: { $in: ["cancel", "reject"] }, createdAt: { $gte: startOfDayIST, $lt: endOfDayIST } }).sort({updatedAt: -1});
+        const openTrades = await LimitOrder.findWithSort({ user: req.user._id, status: { $in: ["cancel", "reject"] }, createdAt: { $gte: startOfDayIST, $lt: endOfDayIST } }, 'updatedAt', 'desc');
         // console.log(openTrades);
 
         const userTradesSell = await Trade.find({ user: req.user._id, type: "sell", createdAt: { $gte: startOfDayIST, $lt: endOfDayIST } });
@@ -1416,7 +1408,7 @@ module.exports = {
 
     const walletBalance = pipeline?.[0]?.balance || 0
 
-    const transactions = await WalletTransaction.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const transactions = await WalletTransaction.findWithSort({ user: req.user._id }, 'createdAt', 'desc');
 
         return res.status(200).json(
           new ApiResponse(
@@ -1438,7 +1430,7 @@ module.exports = {
       const user = await User.findById(id);
       if (!user) return res.status(404).json({ error: "User not found" });
 
-      const transactions = await WalletTransaction.find({ user: id }).sort({ createdAt: -1 });
+      const transactions = await WalletTransaction.findWithSort({ user: id }, 'createdAt', 'desc');
   
           return res.status(200).json(
             new ApiResponse(
