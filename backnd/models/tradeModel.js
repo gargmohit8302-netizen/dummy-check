@@ -27,6 +27,12 @@ class Trade {
         return db.collection('trades');
     }
 
+    static async create(data) {
+        const trade = new Trade(data);
+        await trade.save();
+        return trade;
+    }
+
     async save() {
         this.updatedAt = new Date();
         const tradeData = {

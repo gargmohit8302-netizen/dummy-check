@@ -1,0 +1,7 @@
+{
+  "@@locale": "en",
+  "hello": "Hello",
+  "error": "Error",
+  "ok": "Ok",
+  "cancel": "Cancel"
+}

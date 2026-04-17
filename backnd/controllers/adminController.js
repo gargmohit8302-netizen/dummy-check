@@ -9,15 +9,14 @@ const { pagination } = require("../utils/helper");
 module.exports = {
 
     register: asyncHandler(async(req, res)=>{
-        const { name, email, password } = req.body
-        // console.log(req.body, "req.body");
+        const { name, email, password, phone } = req.body
 
-        const findUser = await Admin.findOne({email})
+        const findUser = await User.findOne({email})
         if(findUser){
             throw new ApiError(400,"Email is already exists")
         }
 
-        const user = await Admin.create({ name, email, password })
+        const user = await User.create({ name, email, password, phone })
 
         user.token = await user.generateToken();
 
@@ -28,11 +27,11 @@ module.exports = {
                 new ApiResponse(
                     201, 
                     user.toJSON1(),
-                    "Admin register successfully"
+                    "User created successfully"
                 )
             )
         }else{
-            throw new ApiError(400,"Admin did not register")
+            throw new ApiError(400,"User did not create")
         }
     }),
 

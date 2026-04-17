@@ -80,6 +80,26 @@ class Token {
         
         return { modifiedCount: 1 };
     }
+
+    static async findOneAndUpdate(query, update, options = {}) {
+        let token = await Token.findOne(query);
+        
+        // If upsert is true and token doesn't exist, create new one
+        if (!token && options.upsert) {
+            const updateData = update.$set || update;
+            token = new Token(updateData);
+            await token.save();
+            return token;
+        }
+        
+        if (!token) return null;
+        
+        const updateData = update.$set || update;
+        Object.assign(token, updateData);
+        await token.save();
+        
+        return token;
+    }
 }
 
 module.exports = Token;

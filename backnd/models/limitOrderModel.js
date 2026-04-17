@@ -70,6 +70,18 @@ class LimitOrder {
         let queryRef = LimitOrder.getCollection();
         
         for (const [key, value] of Object.entries(query)) {
+            if (key === '_id') {
+                // Handle _id as document ID
+                const doc = await LimitOrder.getCollection().doc(value).get();
+                if (!doc.exists) return null;
+                const order = new LimitOrder({ id: doc.id, ...doc.data() });
+                // Check other query conditions
+                const otherKeys = Object.keys(query).filter(k => k !== '_id');
+                for (const k of otherKeys) {
+                    if (order[k] !== query[k]) return null;
+                }
+                return order;
+            }
             queryRef = queryRef.where(key, '==', value);
         }
         
@@ -112,6 +124,52 @@ class LimitOrder {
         await order.save();
         
         return { modifiedCount: 1 };
+    }
+
+    static async findOneAndUpdate(query, update, options = {}) {
+        const order = await LimitOrder.findOne(query);
+        if (!order) return null;
+        
+        const updateData = update.$set || update;
+        Object.assign(order, updateData);
+        await order.save();
+        
+        return order;
+    }
+
+    static async updateMany(query, update) {
+        const orders = await LimitOrder.find(query);
+        if (orders.length === 0) return { modifiedCount: 0 };
+        
+        const updateData = update.$set || update;
+        const batch = db.batch();
+        
+        orders.forEach(order => {
+            Object.assign(order, updateData);
+            const orderData = {
+                status: order.status,
+                instrument_id: order.instrument_id,
+                tradingsymbol: order.tradingsymbol,
+                name: order.name,
+                exchange: order.exchange,
+                price: order.price,
+                quantity: order.quantity,
+                lot_size: order.lot_size,
+                expiry: order.expiry,
+                marginBlocked: order.marginBlocked,
+                instrument_type: order.instrument_type,
+                order_type: order.order_type,
+                buy_type: order.buy_type,
+                show_type: order.show_type,
+                user: order.user,
+                buy_price: order.buy_price,
+                updatedAt: new Date()
+            };
+            batch.update(LimitOrder.getCollection().doc(order.id), orderData);
+        });
+        
+        await batch.commit();
+        return { modifiedCount: orders.length };
     }
 }
 

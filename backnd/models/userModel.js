@@ -7,6 +7,7 @@ class User {
         this.id = data.id || null;
         this.email = data.email || '';
         this.name = data.name || '';
+        this.phone = data.phone || '';
         this.password = data.password || '';
         this.token = data.token || '';
         this.role = data.role || '';
@@ -21,11 +22,33 @@ class User {
         return db.collection('users');
     }
 
+    static async create(data) {
+        const user = new User(data);
+        
+        // Hash password before saving
+        if (user.password) {
+            user.password = await bcrypt.hash(user.password, 10);
+        }
+        
+        await user.save();
+        return user;
+    }
+
+    static async findByIdAndUpdate(id, updateData) {
+        const user = await User.findById(id);
+        if (!user) return null;
+        
+        Object.assign(user, updateData);
+        await user.save();
+        return user;
+    }
+
     async save() {
         this.updatedAt = new Date();
         const userData = {
             email: this.email.toLowerCase().trim(),
             name: this.name.trim(),
+            phone: this.phone || '',
             password: this.password,
             token: this.token,
             role: this.role,
@@ -90,7 +113,7 @@ class User {
         return { deletedCount: 0 };
     }
 
-    generateToken() {
+    async generateToken() {
         return jwt.sign(
             {
                 _id: this.id,
@@ -99,6 +122,10 @@ class User {
             },
             process.env.TOKEN_SECRET
         );
+    }
+
+    async isPasswordCorrect(password) {
+        return await bcrypt.compare(password, this.password);
     }
 
     toJSON1() {

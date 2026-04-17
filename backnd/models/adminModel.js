@@ -18,6 +18,22 @@ class Admin {
         return db.collection('admins');
     }
 
+    static async create(data) {
+        const admin = new Admin(data);
+        admin._isPasswordModified = true;
+        await admin.save();
+        return admin;
+    }
+
+    static async findByIdAndUpdate(id, updateData) {
+        const admin = await Admin.findById(id);
+        if (!admin) return null;
+        
+        Object.assign(admin, updateData);
+        await admin.save();
+        return admin;
+    }
+
     isModified(field) {
         if (field === 'password') {
             return this._isPasswordModified;
@@ -90,7 +106,7 @@ class Admin {
         return await bcrypt.compare(password, this.password);
     }
 
-    generateToken() {
+    async generateToken() {
         return jwt.sign(
             {
                 _id: this.id,
