@@ -14,6 +14,7 @@ router.post('/logout', adminAuth, logout)
 router.post('/create/user', createUser)
 router.post('/user/:id', adminAuth, editUser)
 router.get('/user', adminAuth, getUsers)
+router.get('/users', adminAuth, getUsers)
 
 router.get('/wallet/:id', adminAuth, getWalletDetailsForAdmin)
 

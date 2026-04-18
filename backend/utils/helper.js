@@ -90,7 +90,8 @@ module.exports = {
   }),
 
   pagination: (data) => {
-    perPage = Number.parseInt(data.perPage);
+    // Support both 'limit' (mobile app) and 'perPage' (web/postman)
+    perPage = Number.parseInt(data.limit || data.perPage);
     page = Number.parseInt(data.page);
     if (!perPage && !page) {
       return {

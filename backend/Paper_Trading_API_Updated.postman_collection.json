@@ -1,8 +1,8 @@
 {
 	"info": {
-		"_postman_id": "paper-trading-v3-2024",
-		"name": "Paper Trading API - Updated v3",
-		"description": "Complete API collection for Paper Trading Backend with Firestore - All endpoints tested and working",
+		"_postman_id": "paper-trading-v4-2024",
+		"name": "Paper Trading API - Updated v4 (Mobile Compatible)",
+		"description": "Complete API collection for Paper Trading Backend with Firestore - Mobile app compatible endpoints with limit parameter support",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -107,7 +107,7 @@
 					"response": []
 				},
 				{
-					"name": "Get All Users (Paginated)",
+					"name": "Get All Users (Web - perPage)",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -139,7 +139,44 @@
 								}
 							]
 						},
-						"description": "Get all users with pagination - includes _id, name, email, walletBalance, trade_limit, isBlocked"
+						"description": "Get all users with pagination using perPage parameter - includes _id, name, email, walletBalance, trade_limit, isBlocked with ISO date format"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users (Mobile - limit)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/users?limit=10&page=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "users"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Items per page (mobile app uses limit instead of perPage)"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true,
+									"description": "Search by name or email"
+								}
+							]
+						},
+						"description": "Mobile app compatible endpoint - uses /users (plural) and limit parameter. Returns same data with ISO formatted dates."
 					},
 					"response": []
 				},
