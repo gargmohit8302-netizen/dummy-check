@@ -178,6 +178,20 @@ module.exports = {
         let totalData = await User.countDocuments(Query);
   
         // Format users for mobile app - ensure _id is included and dates are serialized
+        const formatDate = (date) => {
+            if (!date) return null;
+            if (date.toDate && typeof date.toDate === 'function') {
+                return date.toDate().toISOString();
+            }
+            if (date instanceof Date) {
+                return date.toISOString();
+            }
+            if (date._seconds) {
+                return new Date(date._seconds * 1000).toISOString();
+            }
+            return date;
+        };
+
         const formattedUsers = getAllUsers.map(user => ({
             _id: user.id,
             id: user.id,
@@ -187,8 +201,8 @@ module.exports = {
             isBlocked: user.isBlocked,
             walletBalance: user.walletBalance,
             trade_limit: user.trade_limit,
-            createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
-            updatedAt: user.updatedAt instanceof Date ? user.updatedAt.toISOString() : user.updatedAt
+            createdAt: formatDate(user.createdAt),
+            updatedAt: formatDate(user.updatedAt)
         }));
   
         if (getAllUsers) {
