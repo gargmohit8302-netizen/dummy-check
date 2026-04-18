@@ -69,7 +69,7 @@ module.exports = {
 
     logout: asyncHandler(async(req, res)=>{
 
-        const user = await Admin.findByIdAndUpdate(req.user._id, { token: null })
+        const user = await Admin.findByIdAndUpdate(req.user.id, { token: null })
 
         return res.status(200).json(
             new ApiResponse(
@@ -121,7 +121,7 @@ module.exports = {
                 type: "credit",
                 amount,
                 description: "Credit amount by admin",
-                admin: req.user._id
+                admin: req.user.id
               });
             await transaction.save();
         }
@@ -177,12 +177,26 @@ module.exports = {
   
         let totalData = await User.countDocuments(Query);
   
+        // Format users for mobile app - ensure _id is included
+        const formattedUsers = getAllUsers.map(user => ({
+            _id: user.id,
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            isBlocked: user.isBlocked,
+            walletBalance: user.walletBalance,
+            trade_limit: user.trade_limit,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
+        }));
+  
         if (getAllUsers) {
             return res.status(200).json(
             new ApiResponse(
                 200,
                 {
-                    data: getAllUsers,  
+                    data: formattedUsers,  
                     totalData: totalData,
                     perPage,
                     page,
