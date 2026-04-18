@@ -177,18 +177,18 @@ module.exports = {
   
         let totalData = await User.countDocuments(Query);
   
-        // Format users for mobile app - ensure _id is included
+        // Format users for mobile app - ensure _id is included and dates are serialized
         const formattedUsers = getAllUsers.map(user => ({
             _id: user.id,
             id: user.id,
             name: user.name,
             email: user.email,
-            phone: user.phone,
+            phone: user.phone || '',
             isBlocked: user.isBlocked,
             walletBalance: user.walletBalance,
             trade_limit: user.trade_limit,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt
+            createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
+            updatedAt: user.updatedAt instanceof Date ? user.updatedAt.toISOString() : user.updatedAt
         }));
   
         if (getAllUsers) {

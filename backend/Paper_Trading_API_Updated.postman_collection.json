@@ -1,0 +1,761 @@
+{
+	"info": {
+		"_postman_id": "paper-trading-v3-2024",
+		"name": "Paper Trading API - Updated v3",
+		"description": "Complete API collection for Paper Trading Backend with Firestore - All endpoints tested and working",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Admin APIs",
+			"item": [
+				{
+					"name": "Admin Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"adminToken\", jsonData.data.token);",
+									"    pm.environment.set(\"adminId\", jsonData.data._id);",
+									"    console.log('Admin Token:', jsonData.data.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "login"]
+						},
+						"description": "Admin login - returns admin token"
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "logout"]
+						},
+						"description": "Admin logout - clears token"
+					},
+					"response": []
+				},
+				{
+					"name": "Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"userToken\", jsonData.data.token);",
+									"    pm.environment.set(\"userId\", jsonData.data._id);",
+									"    console.log('User Created - ID:', jsonData.data._id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"9876543210\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/create/user",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "create", "user"]
+						},
+						"description": "Create a new user - returns user with token"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users (Paginated)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/user?perPage=20&page=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "user"],
+							"query": [
+								{
+									"key": "perPage",
+									"value": "20",
+									"description": "Items per page"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true,
+									"description": "Search by name or email"
+								}
+							]
+						},
+						"description": "Get all users with pagination - includes _id, name, email, walletBalance, trade_limit, isBlocked"
+					},
+					"response": []
+				},
+				{
+					"name": "Edit User - Add Money",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 10000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/user/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "user", "{{userId}}"]
+						},
+						"description": "Add money to user wallet"
+					},
+					"response": []
+				},
+				{
+					"name": "Edit User - Set Trade Limit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"trade_limit\": 5\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/user/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "user", "{{userId}}"]
+						},
+						"description": "Set user's trade limit"
+					},
+					"response": []
+				},
+				{
+					"name": "Edit User - Block/Unblock",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"isBlocked\": \"fail\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/user/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "user", "{{userId}}"]
+						},
+						"description": "Block/Unblock user - values: 'init', 'pass', 'fail', true, false"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Wallet Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/wallet/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "wallet", "{{userId}}"]
+						},
+						"description": "Get user's wallet balance and transaction history"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User APIs",
+			"item": [
+				{
+					"name": "User Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"userToken\", jsonData.data.token);",
+									"    pm.environment.set(\"userId\", jsonData.data._id);",
+									"    console.log('User Token:', jsonData.data.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/user/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "user", "login"]
+						},
+						"description": "User login - returns user token"
+					},
+					"response": []
+				},
+				{
+					"name": "User Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/user/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "user", "logout"]
+						},
+						"description": "User logout - clears token"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/user",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "user"]
+						},
+						"description": "Get current user's profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Wallet",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/wallet",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "wallet"]
+						},
+						"description": "Get user's wallet balance and transactions"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Trading APIs",
+			"item": [
+				{
+					"name": "Buy Shares/Options",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"instrument_id\": \"738561\",\n  \"quantity\": 1,\n  \"price\": 0,\n  \"type\": \"market\",\n  \"show_type\": \"market\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/buy",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "buy"]
+						},
+						"description": "Buy shares or options - type: 'market' or 'limit'"
+					},
+					"response": []
+				},
+				{
+					"name": "Sell Shares/Options",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"instrument_id\": \"738561\",\n  \"quantity\": 1,\n  \"price\": 0,\n  \"type\": \"market\",\n  \"show_type\": \"market\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/sell",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "sell"]
+						},
+						"description": "Sell shares or options - type: 'market' or 'limit'"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Portfolio - Open Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/portfolio?type=open",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "portfolio"],
+							"query": [
+								{
+									"key": "type",
+									"value": "open"
+								}
+							]
+						},
+						"description": "Get pending limit orders"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Portfolio - Holdings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/portfolio?type=holding",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "portfolio"],
+							"query": [
+								{
+									"key": "type",
+									"value": "holding"
+								}
+							]
+						},
+						"description": "Get holdings (trades before today)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Portfolio - Positions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/portfolio?type=position",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "portfolio"],
+							"query": [
+								{
+									"key": "type",
+									"value": "position"
+								}
+							]
+						},
+						"description": "Get today's positions"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Portfolio - Executed",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/portfolio?type=executed",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "portfolio"],
+							"query": [
+								{
+									"key": "type",
+									"value": "executed"
+								}
+							]
+						},
+						"description": "Get executed trades for today"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/order/cancel/ORDER_ID",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "order", "cancel", "ORDER_ID"]
+						},
+						"description": "Cancel a pending limit order"
+					},
+					"response": []
+				},
+				{
+					"name": "Modify Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"price\": 2500,\n  \"quantity\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/order/modify/ORDER_ID",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "order", "modify", "ORDER_ID"]
+						},
+						"description": "Modify pending order price or quantity"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Market Data APIs",
+			"item": [
+				{
+					"name": "Search Instruments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/search?search=RELIANCE",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "search"],
+							"query": [
+								{
+									"key": "search",
+									"value": "RELIANCE"
+								}
+							]
+						},
+						"description": "Search for stocks/options by name or symbol"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Full Market Quotes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/quote/full?symbols=NSE:RELIANCE,NSE:TCS",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "quote", "full"],
+							"query": [
+								{
+									"key": "symbols",
+									"value": "NSE:RELIANCE,NSE:TCS"
+								}
+							]
+						},
+						"description": "Get full market quotes with OHLC, volume, etc."
+					},
+					"response": []
+				},
+				{
+					"name": "Get OHLC Quotes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/quote/ohlc?symbols=NSE:RELIANCE",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "quote", "ohlc"],
+							"query": [
+								{
+									"key": "symbols",
+									"value": "NSE:RELIANCE"
+								}
+							]
+						},
+						"description": "Get OHLC data for instruments"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Historical Data",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/historical?instrumentToken=738561&from=2024-01-01&to=2024-01-31&interval=day",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "historical"],
+							"query": [
+								{
+									"key": "instrumentToken",
+									"value": "738561"
+								},
+								{
+									"key": "from",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "to",
+									"value": "2024-01-31"
+								},
+								{
+									"key": "interval",
+									"value": "day"
+								}
+							]
+						},
+						"description": "Get historical candle data"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Wishlist APIs",
+			"item": [
+				{
+					"name": "Add to Wishlist",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/wishlist/My Stocks/738561",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "wishlist", "My Stocks", "738561"]
+						},
+						"description": "Add instrument to wishlist - params: wishlist_name, instrument_token"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Wishlist",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/wishlist/My Stocks",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "wishlist", "My Stocks"]
+						},
+						"description": "Get all items in a wishlist"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete from Wishlist",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/wishlist/WISHLIST_ID",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "wishlist", "WISHLIST_ID"]
+						},
+						"description": "Remove item from wishlist by ID"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://paper-trading-backend-bz8w.onrender.com",
+			"type": "string"
+		},
+		{
+			"key": "adminToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "adminId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
